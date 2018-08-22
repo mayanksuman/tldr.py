@@ -68,7 +68,7 @@ Initialize
        $ tldr init
        Input the tldr repo path: (e.g. /home/lord63/code/tldr/)
        Input your platform(linux, osx or sunos): (e.g. linux)
-       Initializing the config file at ~/.tldrrc
+       Initializing the config file at ~/.config/tldr.py.conf
 
 and you configuration file should look like this:
 
@@ -143,7 +143,7 @@ A: I'm afraid not, but you can add an alias: `alias howto='tldr find'`, then use
 
     Q: I don't like the default color theme, how to change it?
 
-A: Edit the tldr configuration file at ``~/.tldrrc``; modify the color
+A: Edit the tldr configuration file at ``~/.config/tldr.py.conf``; modify the color
 until you're happy with it.
 
     Q: I faided to update the tldr pages, why?
