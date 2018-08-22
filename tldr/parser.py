@@ -15,11 +15,13 @@ def parse_page(page):
     is_squeeze = get_config()['squeeze']
     with io.open(page, encoding='utf-8') as f:
         lines = f.readlines()
-    output_lines = []
+    output_lines = ['\n']
     for line in lines[1:]:
         if is_headline(line):
             output_lines.append(process_headline(line, colors))
         elif is_description(line):
+            if is_squeeze and is_line_break(output_lines[-1]):
+                output_lines.pop()
             output_lines.append(process_description_line(line, colors))
         elif is_old_usage(line):
             output_lines.append(process_usage_line(line, colors))
@@ -29,34 +31,33 @@ def parse_page(page):
             output_lines.append(process_command_line(line, colors))
         elif is_line_break(line):
             if is_squeeze:
-                if output_lines:
-                    if ~is_line_break(output_lines[-1]):
-                        output_lines.append(line)
+                if ~is_line_break(output_lines[-1]):
+                    output_lines.append(line)
             else:
                 output_lines.append(line)
         else:
             output_lines.append(process_usage_line('- ' + line, colors))
-    return output_lines
+    return output_lines[1:]
 
 
 def is_headline(line):
-    return line.startswith(('#', '='))
+    return click.unstyle(line).startswith(('#', '='))
 
 
 def is_description(line):
-    return line.startswith('>')
+    return click.unstyle(line).startswith('>')
 
 
 def is_old_usage(line):
-    return line.startswith('-')
+    return click.unstyle(line).startswith('-')
 
 
 def is_code_example(line):
-    return line.startswith(('`', '    '))
+    return click.unstyle(line).startswith(('`', '    '))
 
 
 def is_line_break(line):
-    return line.startswith("\n")
+    return click.unstyle(line).startswith("\n")
 
 
 def _color_text_block(line,
@@ -137,19 +138,17 @@ def process_command_line(line, colors):
 def process_usage_line(line, colors):
     """Color the usage line."""
     default_color = colors['usage']
-    line = line.rstrip()
 
     line = _color_command_option(line, colors['command'], default_color)
     line = _color_inline_command(line, colors['command'], default_color)
     line = click.style(line, fg=default_color)
 
-    return line + '\n'
+    return line
 
 
 def process_description_line(line, colors):
     """Color the description line."""
     default_color = colors['description']
-    line = line.rstrip()
     if line[0] == '>' or line[:2] == ' >':
         line = line.replace('>', ' ', 1)
 
@@ -157,13 +156,15 @@ def process_description_line(line, colors):
     line = _color_inline_command(line, colors['command'], default_color)
     line = click.style(line, fg=default_color)
 
-    return line + '\n'
+    return line
 
 
 def process_headline(line, colors):
     """Color the headline."""
-    line_p = line.split(' ', 1)
-    line_p[0] = click.style(line_p[0], fg='black')
-    line_p[1] = click.style(line_p[1], fg=colors['headline'], bold=True)
+    line = click.style(line,  fg=colors['headline'], bold=True, reverse=True)
+    # line_p = line.split(' ', 1)
+    # line_p[0] = click.style(line_p[0], fg='black', reverse=True)
+    # line_p[1] = click.style(line_p[1], fg=colors['headline'], bold=True, reverse=True)
 
-    return ' '.join(line_p)
+    return line
+    # return ' '.join(line_p).rstrip()
