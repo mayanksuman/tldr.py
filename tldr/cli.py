@@ -167,7 +167,8 @@ def init():
         config = {
             "repo_directory": repo_path,
             "colors": colors,
-            "platform": platform
+            "platform": platform,
+            "squeeze": 0
         }
         with open(default_config_path, 'w') as f:
             f.write(yaml.safe_dump(config, default_flow_style=False))

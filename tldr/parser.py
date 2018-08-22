@@ -5,7 +5,6 @@ from __future__ import absolute_import
 
 import io
 import click
-import pdb
 
 from tldr.config import get_config
 
@@ -13,6 +12,7 @@ from tldr.config import get_config
 def parse_page(page):
     """Parse the command man page."""
     colors = get_config()['colors']
+    is_squeeze = get_config()['squeeze']
     with io.open(page, encoding='utf-8') as f:
         lines = f.readlines()
     output_lines = []
@@ -24,9 +24,16 @@ def parse_page(page):
         elif is_old_usage(line):
             output_lines.append(process_usage_line(line, colors))
         elif is_code_example(line):
+            if is_squeeze and is_line_break(output_lines[-1]):
+                output_lines.pop()
             output_lines.append(process_command_line(line, colors))
         elif is_line_break(line):
-            output_lines.append(line)
+            if is_squeeze:
+                if output_lines:
+                    if ~is_line_break(output_lines[-1]):
+                        output_lines.append(line)
+            else:
+                output_lines.append(line)
         else:
             output_lines.append(process_usage_line('- ' + line, colors))
     return output_lines
